@@ -1,0 +1,137 @@
+CURRENT QUESTION: How many times was each habit completed?
+
+Generated Query:
+SELECT h.habit_id, h.habit_name, COUNT(hl.log_id) AS completion_count
+FROM habits h
+LEFT JOIN habit_logs hl ON h.habit_id = hl.habit_id AND hl.is_done = 1
+GROUP BY h.habit_id, h.habit_name;
+
+Results of Query:
+[(1, 'Brush Teeth', 30), (2, 'Call Mom', 17), (3, 'Clean Room', 18), (4, 'DISHES', 6), (5, 'Drink water', 28), (6, 'Eat a Veggie', 12), (7, 'Eat Breakfast', 3), (8, 'Make bed', 29), (9, 'Practice', 4), (10, 'Scriptures', 7), (11, 'Study', 26), (12, 'Walk Dog', 10), (13, 'Water x3', 12), (14, 'Workout', 5)]
+
+Here are the completion counts for each habit: "Brush Teeth" was completed 30 times, "Call Mom" 17 times, "Clean Room" 18 times, "DISHES" 6 times, "Drink Water" 28 times, "Eat a Veggie" 12 times, "Eat Breakfast" 3 times, "Make Bed" 29 times, "Practice" 4 times, "Scriptures" 7 times, "Study" 26 times, "Walk Dog" 10 times, "Water x3" 12 times, and "Workout" 5 times.
+
+
+
+CURRENT QUESTION: Which users completed the most habits last week?
+
+Generated Query:
+SELECT u.user_id, u.user_name, COUNT(DISTINCT hl.habit_id) AS completed_habits
+FROM users u
+JOIN habits h ON u.user_id = h.user_id
+JOIN habit_logs hl ON h.habit_id = hl.habit_id
+WHERE hl.is_done = 1 AND hl.log_date >= date('now', '-7 days') AND hl.log_date < date('now')
+GROUP BY u.user_id, u.user_name
+ORDER BY completed_habits DESC
+LIMIT 1;
+
+Results of Query:
+[(1004, 'User E', 4)]
+
+User E completed the most habits last week, finishing a total of 4.
+
+
+
+CURRENT QUESTION: Who has the longest current streak?
+
+Generated Query:
+SELECT u.user_id, u.user_name, COUNT(hl.log_id) AS current_streak
+FROM users u
+JOIN habits h ON u.user_id = h.user_id
+JOIN habit_logs hl ON h.habit_id = hl.habit_id
+WHERE hl.is_done = 1 AND hl.log_date >= DATE('now', '-7 days')
+GROUP BY u.user_id
+ORDER BY current_streak DESC
+LIMIT 1;
+
+Results of Query:
+[(1000, 'User A', 19)]
+
+User A currently has the longest streak with 19 completed habits in the last week.
+
+
+
+CURRENT QUESTION: What habits have the longest recorded streaks?
+
+Generated Query:
+SELECT h.habit_id, h.habit_name, COUNT(hl.log_date) AS streak_length
+FROM habits h
+JOIN habit_logs hl ON h.habit_id = hl.habit_id
+WHERE hl.is_done = 1
+GROUP BY h.habit_id, h.habit_name
+ORDER BY streak_length DESC;
+
+Results of Query:
+[(1, 'Brush Teeth', 30), (8, 'Make bed', 29), (5, 'Drink water', 28), (11, 'Study', 26), (3, 'Clean Room', 18), (2, 'Call Mom', 17), (6, 'Eat a Veggie', 12), (13, 'Water x3', 12), (12, 'Walk Dog', 10), (10, 'Scriptures', 7), (4, 'DISHES', 6), (14, 'Workout', 5), (9, 'Practice', 4), (7, 'Eat Breakfast', 3)]
+
+The habits with the longest streaks are 'Brush Teeth' at 30 days, followed closely by 'Make bed' at 29 days and 'Drink water' at 28 days.
+
+
+
+CURRENT QUESTION: What habits are people struggling with lately?
+
+Generated Query:
+SELECT h.habit_name, COUNT(hl.log_id) AS struggle_count
+FROM habits h
+JOIN habit_logs hl ON h.habit_id = hl.habit_id
+WHERE hl.is_done = 0 AND hl.log_date >= DATE('now', '-30 days')
+GROUP BY h.habit_id
+ORDER BY struggle_count DESC;
+
+Results of Query:
+[('Workout', 27), ('Scriptures', 25), ('Walk Dog', 19), ('Clean Room', 14), ('Water x3', 13), ('Call Mom', 12), ('Eat a Veggie', 11), ('Eat Breakfast', 10), ('Study', 4), ('Drink water', 4), ('Make bed', 3), ('Brush Teeth', 2), ('DISHES', 1)]
+
+People are currently struggling the most with working out, reading scriptures, and walking their dogs, with many also having difficulty keeping their rooms clean and staying hydrated.
+
+
+
+CURRENT QUESTION: Who is the most consistent user?
+
+Generated Query:
+SELECT u.user_id, u.user_name, COUNT(DISTINCT hl.log_date) AS consistent_days
+FROM users u
+JOIN habits h ON u.user_id = h.user_id
+JOIN habit_logs hl ON h.habit_id = hl.habit_id AND hl.is_done = 1
+GROUP BY u.user_id, u.user_name
+ORDER BY consistent_days DESC
+LIMIT 1;
+
+Results of Query:
+[(1000, 'User A', 32)]
+
+User A is the most consistent user, logging their habits successfully on 32 different days.
+
+
+
+CURRENT QUESTION: Which habits are the hardest to maintain?
+
+Generated Query:
+SELECT h.habit_name, COUNT(hl.log_id) AS log_count
+FROM habits h
+LEFT JOIN habit_logs hl ON h.habit_id = hl.habit_id
+GROUP BY h.habit_id
+ORDER BY log_count ASC
+LIMIT 10;
+
+Results of Query:
+[('Practice', 4), ('DISHES', 7), ('Eat Breakfast', 13), ('Eat a Veggie', 23), ('Water x3', 25), ('Call Mom', 29), ('Walk Dog', 29), ('Study', 30), ('Brush Teeth', 32), ('Clean Room', 32)]
+
+The hardest habits to maintain, based on the number of times they were logged, are "Practice," "DISHES," and "Eat Breakfast," with very few logs compared to others like "Brush Teeth" and "Clean Room."
+
+
+
+CURRENT QUESTION: Who sticks with habits?
+
+Generated Query:
+SELECT u.user_id, u.user_name, COUNT(DISTINCT h.habit_id) AS habit_count
+FROM users u
+JOIN habits h ON u.user_id = h.user_id
+JOIN habit_logs hl ON h.habit_id = hl.habit_id
+WHERE hl.is_done = 1
+GROUP BY u.user_id
+HAVING COUNT(DISTINCT hl.log_date) > 0;
+
+Results of Query:
+[(1000, 'User A', 3), (1001, 'User B', 2), (1002, 'User C', 3), (1003, 'User D', 2), (1004, 'User E', 4)]
+
+The results show that Users A and C each successfully maintained 3 habits, Users B and D kept up with 2 habits, and User E excelled with 4 habits.
